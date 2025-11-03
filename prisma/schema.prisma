@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  tasks     Task[]
+  sessions  Session[]
+  createdAt DateTime @default(now())
+}
+
+model Task {
+  id                 String   @id @default(uuid())
+  userId             String
+  user               User     @relation(fields: [userId], references: [id])
+  title              String
+  deadline           DateTime?
+  priority           String   @default("medium") // "high" | "medium" | "low"
+  estimatedSessions  Int      @default(1)
+  completedSessions  Int      @default(0)
+  status             String   @default("not-started") // "not-started" | "in-progress" | "completed"
+  createdAt          DateTime @default(now())
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  taskId       String?
+  task         Task?    @relation(fields: [taskId], references: [id])
+  duration     Int      // dalam menit
+  notes        String?
+  completedAt  DateTime @default(now())
+}
